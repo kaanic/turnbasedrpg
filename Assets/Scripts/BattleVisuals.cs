@@ -26,8 +26,6 @@ public class BattleVisuals : MonoBehaviour
     void Start() 
     {
         anim = gameObject.GetComponent<Animator>();
-        SetStartingValues(25, 25, 99);
-        PlayAttackAnimation();
     }
 
     public void SetStartingValues(int currentHealth, int maxHealth, int level)
