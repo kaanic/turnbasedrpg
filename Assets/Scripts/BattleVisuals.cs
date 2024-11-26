@@ -23,7 +23,7 @@ public class BattleVisuals : MonoBehaviour
     private const string IS_HIT_PARAMETER = "IsHit";
     private const string IS_DEAD_PARAMETER = "IsDead";
 
-    void Start() 
+    void Awake() 
     {
         anim = gameObject.GetComponent<Animator>();
     }
