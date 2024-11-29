@@ -3,12 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BattleSystem : MonoBehaviour
 {
     [SerializeField] private enum BattleState { Start, Selection, Battle, Won, Lost, Run }
 
-    [Header("UI")]
+    [Header("Battle State")]
     [SerializeField] private BattleState state;
 
     [Header("Spawn Points")]
@@ -34,7 +35,9 @@ public class BattleSystem : MonoBehaviour
 
     private const string ACTION_MESSAGE = "'s Actions:";
     private const string WIN_MESSAGE = "Your party has won the battle.";
+    private const string LOSE_MESSAGE = "Your party has been defeated.";
     private const int TURN_DURATION = 2;
+    private const string OVERWORLD_SCENE = "OverworldScene";
 
     void Start()
     {
@@ -54,18 +57,21 @@ public class BattleSystem : MonoBehaviour
 
         for (int i = 0; i < allBattlers.Count; i++)
         {
-            switch (allBattlers[i].BattleAction)
+            if (state == BattleState.Battle)
             {
-                case BattleEntities.Action.Attack:
-                    yield return StartCoroutine(AttackRoutine(i));
-                    break;
+                switch (allBattlers[i].BattleAction)
+                {
+                    case BattleEntities.Action.Attack:
+                        yield return StartCoroutine(AttackRoutine(i));
+                        break;
 
-                case BattleEntities.Action.Run:
-                    break;
+                    case BattleEntities.Action.Run:
+                        break;
 
-                default:
-                    Debug.Log("Error - incorrect battle action.");
-                    break;
+                    default:
+                        SceneManager.LoadScene(OVERWORLD_SCENE);
+                        break;
+                }
             }
         }
 
@@ -81,9 +87,16 @@ public class BattleSystem : MonoBehaviour
 
     private IEnumerator AttackRoutine(int i)
     {
+        // player's turn
         if (allBattlers[i].IsPlayer)
         {
             BattleEntities currentAttacker = allBattlers[i];
+
+            if (allBattlers[currentAttacker.Target].IsPlayer || currentAttacker.Target >= allBattlers.Count)
+            {
+                currentAttacker.SetTarget(GetRandomEnemy());
+            }
+
             BattleEntities currentTarget = allBattlers[currentAttacker.Target];
             AttackAction(currentAttacker, currentTarget);
             yield return new WaitForSeconds(TURN_DURATION);
@@ -101,6 +114,33 @@ public class BattleSystem : MonoBehaviour
                     bottomText.text = WIN_MESSAGE;
                     yield return new WaitForSeconds(TURN_DURATION);
                     Debug.Log("Go back to overworld.");
+                }
+            }
+        }
+
+        //enemy's turn
+        if (allBattlers[i].IsPlayer == false)
+        {
+            BattleEntities currentAttacker = allBattlers[i];
+            currentAttacker.SetTarget(GetRandomPartyMember());
+            BattleEntities currentTarget = allBattlers[currentAttacker.Target];
+
+            AttackAction(currentAttacker, currentTarget);
+            yield return new WaitForSeconds(TURN_DURATION);
+
+            if (currentTarget.CurrentHealth <= 0)
+            {
+                bottomText.text = string.Format("{0} defeated {1}.", currentAttacker.Name, currentTarget.Name);
+                yield return new WaitForSeconds(TURN_DURATION);
+                playerBattlers.Remove(currentTarget);
+                allBattlers.Remove(currentTarget);
+
+                if (playerBattlers.Count <= 0)
+                {
+                    state = BattleState.Lost;
+                    bottomText.text = LOSE_MESSAGE;
+                    yield return new WaitForSeconds(TURN_DURATION);
+                    Debug.Log("Game over.");
                 }
             }
         }
@@ -177,7 +217,7 @@ public class BattleSystem : MonoBehaviour
 
     public void SelectEnemy(int currentEnemy)
     {
-        BattleEntities currentPlayerEntity = playerBattlers[currentEnemy];
+        BattleEntities currentPlayerEntity = playerBattlers[currentPlayer];
         currentPlayerEntity.SetTarget(allBattlers.IndexOf(enemyBattlers[currentEnemy]));
 
         currentPlayerEntity.BattleAction = BattleEntities.Action.Attack;
@@ -203,6 +243,36 @@ public class BattleSystem : MonoBehaviour
         currentTarget.BattleVisuals.PlayHitAnimation();
         currentTarget.UpdateUI();
         bottomText.text = string.Format("{0} attacks {1} for {2} damage.", currentAttacker.Name, currentTarget.Name, damage);
+    }
+
+    private int GetRandomPartyMember()
+    {
+        List<int> partyMembers = new List<int>();
+
+        for (int i = 0; i < allBattlers.Count; i++)
+        {
+            if (allBattlers[i].IsPlayer)
+            {
+                partyMembers.Add(i);
+            }
+        }
+
+        return partyMembers[UnityEngine.Random.Range(0, partyMembers.Count)];
+    }
+
+    private int GetRandomEnemy()
+    {
+        List<int> enemyList = new List<int>();
+
+        for (int i = 0; i < allBattlers.Count; i++)
+        {
+            if (!allBattlers[i].IsPlayer)
+            {
+                enemyList.Add(i);
+            }
+        }
+
+        return enemyList[UnityEngine.Random.Range(0, enemyList.Count)];
     }
 
 }
