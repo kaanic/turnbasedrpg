@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -36,7 +38,10 @@ public class BattleSystem : MonoBehaviour
     private const string ACTION_MESSAGE = "'s Actions:";
     private const string WIN_MESSAGE = "Your party has won the battle.";
     private const string LOSE_MESSAGE = "Your party has been defeated.";
+    private const string RUN_MESSAGE = "Your party has ran away.";
+    private const string RUN_FAIL_MESSAGE = "Your party has failed to run away.";
     private const int TURN_DURATION = 2;
+    private const int RUN_CHANCE = 50;
     private const string OVERWORLD_SCENE = "OverworldScene";
 
     void Start()
@@ -47,6 +52,7 @@ public class BattleSystem : MonoBehaviour
         CreatePartyEntities();
         CreateEnemyEntities();
         ShowBattleMenu();
+        DetermineBattleOrder();
     }
 
     private IEnumerator BattleRoutine()
@@ -57,7 +63,7 @@ public class BattleSystem : MonoBehaviour
 
         for (int i = 0; i < allBattlers.Count; i++)
         {
-            if (state == BattleState.Battle)
+            if (state == BattleState.Battle && allBattlers[i].CurrentHealth > 0)
             {
                 switch (allBattlers[i].BattleAction)
                 {
@@ -66,14 +72,17 @@ public class BattleSystem : MonoBehaviour
                         break;
 
                     case BattleEntities.Action.Run:
+                        yield return StartCoroutine(RunRoutine());
                         break;
 
                     default:
-                        SceneManager.LoadScene(OVERWORLD_SCENE);
+                        Debug.Log("Incorrect battle action.");
                         break;
                 }
             }
         }
+
+        RemoveDeadBattlers();
 
         if (state == BattleState.Battle)
         {
@@ -92,7 +101,7 @@ public class BattleSystem : MonoBehaviour
         {
             BattleEntities currentAttacker = allBattlers[i];
 
-            if (allBattlers[currentAttacker.Target].IsPlayer || currentAttacker.Target >= allBattlers.Count)
+            if (allBattlers[currentAttacker.Target].CurrentHealth <= 0)
             {
                 currentAttacker.SetTarget(GetRandomEnemy());
             }
@@ -106,20 +115,19 @@ public class BattleSystem : MonoBehaviour
                 bottomText.text = string.Format("{0} defeated {1}.", currentAttacker.Name, currentTarget.Name);
                 yield return new WaitForSeconds(TURN_DURATION);
                 enemyBattlers.Remove(currentTarget);
-                allBattlers.Remove(currentTarget);
 
                 if (enemyBattlers.Count <= 0)
                 {
                     state = BattleState.Won;
                     bottomText.text = WIN_MESSAGE;
                     yield return new WaitForSeconds(TURN_DURATION);
-                    Debug.Log("Go back to overworld.");
+                    SceneManager.LoadScene(OVERWORLD_SCENE);
                 }
             }
         }
 
         //enemy's turn
-        if (allBattlers[i].IsPlayer == false)
+        if (i < allBattlers.Count && allBattlers[i].IsPlayer == false)
         {
             BattleEntities currentAttacker = allBattlers[i];
             currentAttacker.SetTarget(GetRandomPartyMember());
@@ -133,7 +141,6 @@ public class BattleSystem : MonoBehaviour
                 bottomText.text = string.Format("{0} defeated {1}.", currentAttacker.Name, currentTarget.Name);
                 yield return new WaitForSeconds(TURN_DURATION);
                 playerBattlers.Remove(currentTarget);
-                allBattlers.Remove(currentTarget);
 
                 if (playerBattlers.Count <= 0)
                 {
@@ -142,6 +149,38 @@ public class BattleSystem : MonoBehaviour
                     yield return new WaitForSeconds(TURN_DURATION);
                     Debug.Log("Game over.");
                 }
+            }
+        }
+    }
+
+    private IEnumerator RunRoutine()
+    {
+        if (state == BattleState.Battle)
+        {
+            if (UnityEngine.Random.Range(1,101) >= RUN_CHANCE)
+            {
+                bottomText.text = RUN_MESSAGE;
+                state = BattleState.Run;
+                allBattlers.Clear();
+                yield return new WaitForSeconds(TURN_DURATION);
+                SceneManager.LoadScene(OVERWORLD_SCENE);
+                yield break;
+            }
+            else
+            {
+                bottomText.text = RUN_FAIL_MESSAGE;
+                yield return new WaitForSeconds(TURN_DURATION);
+            }
+        }
+    }
+
+    private void RemoveDeadBattlers() 
+    {
+        for (int i = 0; i < allBattlers.Count; i++)
+        {
+            if (allBattlers[i].CurrentHealth <= 0)
+            {
+                allBattlers.RemoveAt(i);
             }
         }
     }
@@ -157,7 +196,7 @@ public class BattleSystem : MonoBehaviour
             tempEntity.SetEntityValues(currentParty[i].MemberName, currentParty[i].CurrentHealth, currentParty[i].MaxHealth, currentParty[i].Initiative, currentParty[i].Strength, currentParty[i].Level, true);
 
             BattleVisuals tempBattleVisuals = Instantiate(currentParty[i].MemberBattleVisualPrefab, partySpawnPoints[i].position, Quaternion.identity).GetComponent<BattleVisuals>();
-            tempBattleVisuals.SetStartingValues(currentParty[i].MaxHealth, currentParty[i].MaxHealth, currentParty[i].Level);
+            tempBattleVisuals.SetStartingValues(currentParty[i].CurrentHealth, currentParty[i].MaxHealth, currentParty[i].Level);
             tempEntity.BattleVisuals = tempBattleVisuals;
 
             allBattlers.Add(tempEntity);
@@ -239,6 +278,7 @@ public class BattleSystem : MonoBehaviour
         currentTarget.BattleVisuals.PlayHitAnimation();
         currentTarget.UpdateUI();
         bottomText.text = string.Format("{0} attacks {1} for {2} damage.", currentAttacker.Name, currentTarget.Name, damage);
+        SaveHealth();
     }
 
     private int GetRandomPartyMember()
@@ -271,6 +311,39 @@ public class BattleSystem : MonoBehaviour
         return enemyList[UnityEngine.Random.Range(0, enemyList.Count)];
     }
 
+    private void SaveHealth()
+    {
+        for (int i = 0; i < playerBattlers.Count; i++)
+        {
+            partyManager.SaveHealth(i, playerBattlers[i].CurrentHealth);
+        }
+    }
+
+    private void DetermineBattleOrder() 
+    {
+        allBattlers.Sort((bi1, bi2) => -bi1.Initiative.CompareTo(bi2.Initiative)); // sorts list by initiative in ascending order, - makes it reversed (default: descending)
+    }
+
+    public void SelectRunAction()
+    {
+        state = BattleState.Selection;
+        BattleEntities currentPlayerEntity = playerBattlers[currentPlayer];
+
+        currentPlayerEntity.BattleAction = BattleEntities.Action.Run;
+        battleMenu.SetActive(false);
+
+        currentPlayer++;
+
+        if (currentPlayer >= playerBattlers.Count)
+        {
+            StartCoroutine(BattleRoutine());
+        }
+        else
+        {
+            enemySelectionMenu.SetActive(false);
+            ShowBattleMenu();
+        }
+    }
 }
 
 [System.Serializable]

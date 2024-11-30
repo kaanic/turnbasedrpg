@@ -21,6 +21,7 @@ public class PlayerController : MonoBehaviour
     private bool movingInGrass;
     private float stepTimer;
     private int stepsToEncounter;
+    private PartyManager partyManager;
 
     private const string WALKING_PARAMETER = "isWalking";
     private const string BATTLE_SCENE = "BattleScene";
@@ -43,6 +44,12 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         rb = gameObject.GetComponent<Rigidbody>();
+        partyManager = GameObject.FindFirstObjectByType<PartyManager>();
+
+        if (partyManager.GetPosition() != Vector3.zero)
+        {
+            transform.position = partyManager.GetPosition();
+        }
     }
 
     void Update()
@@ -84,6 +91,7 @@ public class PlayerController : MonoBehaviour
 
                 if (stepsInGrass >= stepsToEncounter)
                 {
+                    partyManager.SetPosition(transform.position);
                     SceneManager.LoadScene(BATTLE_SCENE);
                 }
             }
