@@ -151,14 +151,12 @@ public class BattleSystem : MonoBehaviour
         List<PartyMember> currentParty = new List<PartyMember>();
         currentParty = partyManager.GetCurrentParty();
 
-        BattleEntities tempEntity = new BattleEntities();
-        BattleVisuals tempBattleVisuals;
-
         for (int i = 0; i < currentParty.Count; i++)
         {
+            BattleEntities tempEntity = new BattleEntities();
             tempEntity.SetEntityValues(currentParty[i].MemberName, currentParty[i].CurrentHealth, currentParty[i].MaxHealth, currentParty[i].Initiative, currentParty[i].Strength, currentParty[i].Level, true);
 
-            tempBattleVisuals = Instantiate(currentParty[i].MemberBattleVisualPrefab, partySpawnPoints[i].position, Quaternion.identity).GetComponent<BattleVisuals>();
+            BattleVisuals tempBattleVisuals = Instantiate(currentParty[i].MemberBattleVisualPrefab, partySpawnPoints[i].position, Quaternion.identity).GetComponent<BattleVisuals>();
             tempBattleVisuals.SetStartingValues(currentParty[i].MaxHealth, currentParty[i].MaxHealth, currentParty[i].Level);
             tempEntity.BattleVisuals = tempBattleVisuals;
 
@@ -172,14 +170,12 @@ public class BattleSystem : MonoBehaviour
         List<Enemy> currentEnemies = new List<Enemy>();
         currentEnemies = enemyManager.GetCurrentEnemies();
 
-        BattleEntities tempEntity = new BattleEntities();
-        BattleVisuals tempBattleVisuals;
-
         for (int i = 0; i < currentEnemies.Count; i++)
         {
+            BattleEntities tempEntity = new BattleEntities();
             tempEntity.SetEntityValues(currentEnemies[i].EnemyName, currentEnemies[i].CurrentHealth, currentEnemies[i].MaxHealth, currentEnemies[i].Initiative, currentEnemies[i].Strength, currentEnemies[i].Level, false);
 
-            tempBattleVisuals = Instantiate(currentEnemies[i].EnemyVisualPrefab, enemySpawnPoints[i].position, Quaternion.identity).GetComponent<BattleVisuals>();
+            BattleVisuals tempBattleVisuals = Instantiate(currentEnemies[i].EnemyVisualPrefab, enemySpawnPoints[i].position, Quaternion.identity).GetComponent<BattleVisuals>();
             tempBattleVisuals.SetStartingValues(currentEnemies[i].MaxHealth, currentEnemies[i].MaxHealth, currentEnemies[i].Level);
             tempEntity.BattleVisuals = tempBattleVisuals;
 
