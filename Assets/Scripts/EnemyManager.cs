@@ -29,7 +29,7 @@ public class EnemyManager : MonoBehaviour
     public void GenerateEnemiesByEncounter(Encounter[] encounters, int maxNumEnemies)
     {
         currentEnemies.Clear();
-        int numEnemies = Random.Range(1, maxNumEnemies);
+        int numEnemies = Random.Range(1, maxNumEnemies + 1);
 
         for (int i = 0; i < numEnemies; i++)
         {

@@ -666,7 +666,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1329083332279060517}
   - component: {fileID: 8510769653944569654}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: John_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -752,7 +752,7 @@ GameObject:
   - component: {fileID: 3896416651074303480}
   - component: {fileID: 3619309980014354267}
   - component: {fileID: 1884865245541779708}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: JohnBattleVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
