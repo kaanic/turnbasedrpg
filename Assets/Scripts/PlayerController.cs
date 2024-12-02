@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Scripting;
 using UnityEngine.SceneManagement;
+using Unity.Properties;
 
 public class PlayerController : MonoBehaviour
 {
@@ -101,5 +102,11 @@ public class PlayerController : MonoBehaviour
     private void CalcStepToNextEncounter() 
     {
         stepsToEncounter = Random.Range(minStepsToEncounter, maxStepsToEncounter);
+    }
+
+    public void SetOverworldVisuals(Animator animator, SpriteRenderer spriteRenderer)
+    {
+        anim = animator;
+        playerSprite = spriteRenderer;
     }
 }
