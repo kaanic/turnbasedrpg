@@ -2322,6 +2322,9 @@ MonoBehaviour:
   - Enemy: {fileID: 11400000, guid: 61c367efa475e5041a2ee9e2fe077d7d, type: 2}
     LevelMin: 1
     LevelMax: 5
+  - Enemy: {fileID: 11400000, guid: 295cc4c41c4438144bdd33b7a2b0dd0d, type: 2}
+    LevelMin: 1
+    LevelMax: 5
   maxNumEnemies: 3
 --- !u!4 &498494882
 Transform:
@@ -4325,6 +4328,23 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy Manager
       objectReference: {fileID: 0}
+    - target: {fileID: 3171483521546942754, guid: a6dfc6269612d11468ea66b9dfa1bf8d,
+        type: 3}
+      propertyPath: allEnemies.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3171483521546942754, guid: a6dfc6269612d11468ea66b9dfa1bf8d,
+        type: 3}
+      propertyPath: allEnemies.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: 61c367efa475e5041a2ee9e2fe077d7d,
+        type: 2}
+    - target: {fileID: 3171483521546942754, guid: a6dfc6269612d11468ea66b9dfa1bf8d,
+        type: 3}
+      propertyPath: allEnemies.Array.data[1]
+      value: 
+      objectReference: {fileID: 11400000, guid: 295cc4c41c4438144bdd33b7a2b0dd0d,
+        type: 2}
     - target: {fileID: 6112923134712271247, guid: a6dfc6269612d11468ea66b9dfa1bf8d,
         type: 3}
       propertyPath: m_LocalPosition.x
