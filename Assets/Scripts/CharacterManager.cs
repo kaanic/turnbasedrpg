@@ -1,11 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Xml.Serialization;
-using Unity.VisualScripting;
 using UnityEngine;
 using TMPro;
-using Unity.Mathematics;
-using UnityEngine.Rendering.Universal;
 
 public class CharacterManager : MonoBehaviour
 {
