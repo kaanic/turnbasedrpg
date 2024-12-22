@@ -5,7 +5,6 @@ public class PartyManager : MonoBehaviour
 {
     [SerializeField] private PartyMemberInfo[] allMembers;
     [SerializeField] private List<PartyMember> currentParty;
-
     [SerializeField] private PartyMemberInfo defaultPartyMember;
 
     private Vector3 playerPosition;

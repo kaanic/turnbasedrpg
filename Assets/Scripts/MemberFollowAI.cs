@@ -11,7 +11,6 @@ public class MemberFollowAI : MonoBehaviour
 
     private const string WALKING_PARAMETER = "IsWalking";
 
-    // Start is called before the first frame update
     void Start()
     {
         anim = gameObject.GetComponent<Animator>();
@@ -20,7 +19,6 @@ public class MemberFollowAI : MonoBehaviour
         followTarget = GameObject.FindFirstObjectByType<PlayerController>().transform;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Vector3.Distance(transform.position, followTarget.position) > followDistance)

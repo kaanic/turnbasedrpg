@@ -5,16 +5,10 @@ public class JoinableCharacter : MonoBehaviour
 {
     public PartyMemberInfo memberToJoin;
     [SerializeField] private GameObject interactPrompt;
-    // Start is called before the first frame update
+    
     void Start()
     {
         CheckIfJoined();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public void ShowInteractPrompt(bool showPrompt)

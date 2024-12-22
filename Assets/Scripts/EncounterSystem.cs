@@ -12,7 +12,6 @@ public class EncounterSystem : MonoBehaviour
         enemyManager = GameObject.FindFirstObjectByType<EnemyManager>();
         enemyManager.GenerateEnemiesByEncounter(enemiesInScene, maxNumEnemies);        
     }
-
 }
 
 [System.Serializable]
